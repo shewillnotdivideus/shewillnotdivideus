@@ -10,6 +10,13 @@
 		<link rel="shortcut icon" href="caaarl.ico" type="image/x-icon">
 
 		<style>
+			#seizure_warning {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				z-index: 9002;
+			}
+
 			#cult_members {
 				position: absolute;
 				z-index: 1;
@@ -20,6 +27,15 @@
 				position: absolute;
 			}
 
+			#cult_members.spin {
+				-webkit-animation:spin 1s linear infinite;
+				-moz-animation:spin 1s linear infinite;
+				animation:spin 1s linear infinite;
+			}
+			@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+			@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+			@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
 			#celebrities {
 				position: absolute;
 				display: inline-block;
@@ -28,37 +44,73 @@
 				width: 100%;
 				height: 100%;
 			}
+			#celebrities.spin2 {
+				-webkit-animation:spin2 2s linear infinite;
+				-moz-animation:spin2 2s linear infinite;
+				animation:spin2 2s linear infinite;
+			}
+			@-moz-keyframes spin2 { 100% { -moz-transform: rotate(-360deg) scale(2, 2); } }
+			@-webkit-keyframes spin2 { 100% { -webkit-transform: rotate(-360deg) scale(2, 2); } }
+			@keyframes spin2 { 100% { -webkit-transform: rotate(-360deg) scale(2, 2); transform:rotate(-360deg) scale(2, 2); } }
+
+			#static {
+				display: none;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 9001;
+			}
+			#static.show {
+				display: block;
+			}
 
 		</style>
 	</head>
 	<body>
+		<div id="seizure_warning">seizure warning</div>
 
 		<div id="cult_members">
 			<iframe src="https://livestream.com/accounts/23093026/events/6897778/player?width=0&height=0&enableInfoAndActivity=true&autoPlay=true&mute=false" width="500" height="281" frameborder="0" scrolling="no" allowfullscreen=""></iframe>
+			<div id="cult_imgs"></div>
 		</div>
 
 		<iframe id="celebrities" src="https://br3ntor.github.io/" noresize="noresize"></iframe>
 
+		<canvas id="static"></canvas>
+
+		<!-- JQuery...quick and dirty -->
+		<script
+			src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+			integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="
+			crossorigin="anonymous"></script>
+
 		<script type="text/javascript">
 			
-			(function(cult){
+			(function($cult, $imgs, $static, $celebs){
+				window.$cult = $cult;
+				window.requestAnimFrame = window.requestAnimationFrame ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame    ||
+					window.oRequestAnimationFrame      ||
+					window.msRequestAnimationFrame     ||
+					function(callback){ window.setTimeout(callback, 1000 / 60); };
 
-				function shuffle(array) {
-					var i = array.length, tv, ri;
-					while (0 !== i) {
-						ri = Math.floor(Math.random() * i);
-						i -= 1;
-						tv = array[i];
-						array[i] = array[ri];
-						array[ri] = tv;
-					}
-					return array;
-				}
+				// tv static
+				// https://github.com/mayfer/m/tree/master/experiments/seizure
+				!function(){function e(a){return Math.floor(Math.random()*a)}function f(f,g,h){h=h||1;f.height,f.width;b.clearRect(0,0,c,d);for(var l=0;l<c;l+=h)for(var m=0;m<d;m+=h)Math.round(Math.random())&&b.fillRect(l,m,h,h);for(var l=0;l<f.width;l+=c)for(var m=0;m<f.height;m+=d)g.drawImage(a,l,m);for(var m=e(10);m<f.height;m+=e(10))g.fillRect(0,m,f.width,e(3));}var a=document.createElement("canvas"),b=a.getContext("2d"),c=100,d=100;a.width=c,a.height=d,a.fillStyle="#000",window.tvstatic=f}();
 
-				var speed = 1;
-				var dx = 2;
-				var dy = 2;
-				var items = shuffle([
+				function shuffle(a){for(var c,d,b=a.length;0!==b;)d=Math.floor(Math.random()*b),b-=1,c=a[b],a[b]=a[d],a[d]=c;return a}
+
+				var speed = 2;
+				var imgx = 100;
+				var imgy = 100;
+				var imgw = 500;
+				var imgh = 281;
+				var dx = 1;
+				var dy = -1;
+				var imgs = shuffle([
 					['https://cdn.meme.am/cache/instances/folder400/500x/60945400.jpg','right:100%;bottom:100%;'],
 					['http://i3.kym-cdn.com/photos/images/facebook/000/678/818/40c.jpg', 'right:100%;top:0;'],
 					['http://i2.kym-cdn.com/photos/images/facebook/000/511/678/26e.jpg', 'right:100%;top:150px;'],
@@ -69,59 +121,175 @@
 					['https://i.ytimg.com/vi/vivXub_LM70/maxresdefault.jpg', 'left:100%;top:260px;'],
 					['https://i.ytimg.com/vi/JgEn9cwrVTY/hqdefault.jpg', 'left:100%;top:110px;'],
 					['https://s-media-cache-ak0.pinimg.com/originals/a9/6f/c5/a96fc59eeb8843bd6ee248a28e56b1d3.jpg', 'left:100%;top:0;'],
-					['https://i.imgflip.com/y7owh.jpg', 'left:100%;bottom:100%;z-index:1;'],
+					['https://i.imgflip.com/y7owh.jpg', 'left:100%;bottom:100%;'],
 
 					['https://i0.wp.com/theralphretort.com/wp-content/uploads/O8PdnAh.jpg?resize=720%2C340', 'left:0;bottom:100%;'],
 					['http://s.quickmeme.com/img/2f/2f24d901b7c748d1c20ecf5719ea9c326bac5d8b43116e953cc290658191ab02.jpg', 'left:200px;bottom:100%;'],
 					['http://i2.kym-cdn.com/photos/images/original/000/999/687/5e1.png', 'left:400px;bottom:100%;'],
 				]);
+				var deadimgs = [];
 
-				function nxt(){
+				var bleed = shuffle([
+					'2SAD4ME',
+					'2SED4AIRHORN',
+					'AIRHORN SONATA',
+					'AIRHORN',
+					'AIRPORN',
+					'DAMN SON WHERED YOU FIND THIS',
+					'DAMN SON WOW',
+					'Darude - Dankstorm',
+					'DEDOTADED WAM',
+					'GET NOSCOPED',
+					'HITMARKER',
+					'intervention 420',
+					'MOM GET THE CAMERA',
+					'NEVER DONE THAT',
+					'Oh Baby A Triple',
+					'SANIC',
+					'SHOTS FIRED',
+					'SKRILLEX Scary',
+					'SMOKE WEEK EVERYDAY',
+					'SPOOKY',
+					'tactical nuke',
+					'Whatcha Say',
+					'WOMBO COMBO',
+					'wow',
+				]);
+				bleed = bleed.map(function(b, i){
+					var url = 'bleed/' + b + '.mp3';
+					var sfx = new Audio(url);
+					sfx.load();
+					//setTimeout(function(){ sfx.load(); }, i * 300);
+					return { t: i * 150, url: b, sfx: sfx };
+				});
 
-					if(!items.length) return false;
+				function next(){
 
-					var item = items.pop();
+					if(!imgs.length) return true;
+
+					var item = imgs.pop();
+					deadimgs.push(item);
+
 					var img = new Image();
 					img.onload = function(){
 						img.setAttribute('class', 'img');
-						cult.appendChild(img);
+						$imgs.append(img);
 					};
 					img.width = 200;
 					img.style = item[1];
 					img.src = item[0];
-					return true;
+					return false;
 				}
 
-				nxt();
+				function randRGB(minLumen){
+					var r = Math.floor(minLumen + Math.random() * (256 - minLumen));
+					var g = Math.floor(minLumen + Math.random() * (256 - minLumen));
+					var b = Math.floor(minLumen + Math.random() * (256 - minLumen));
+					return 'rgb(' + r + ',' + g + ',' + b + ')';
+				}
 
+				var won = false;
+
+				function youwin(){
+					var oldSpeed = speed;
+					
+					$cult.addClass('spin');
+					$celebs.addClass('spin2');
+					$static.addClass('show');
+					won = true;
+					speed = 100;
+
+					imgs = shuffle(deadimgs);
+					deadimgs = [];
+
+					bleed.forEach(function(b){
+						setTimeout(function(){
+							b.sfx.play();
+						}, b.t);
+					});
+
+					(function(){
+						var lumenbase = 150;
+						var cvs = $static[0];
+						var ctx = cvs.getContext('2d');
+						cvs.width = window.innerWidth;
+						cvs.height = window.innerHeight;
+						function static(t){
+							if(won) requestAnimationFrame(static);
+							ctx.clearRect(0, 0, cvs.width, cvs.height);
+							ctx.globalAlpha = 0.5;
+							tvstatic(cvs, ctx, 1);
+							
+							var lumen = lumenbase + Math.sin(t) * 100;
+							ctx.fillStyle = randRGB(lumen);
+
+							ctx.fillRect(0, 0, cvs.width, cvs.height);
+							ctx.globalAlpha = 1;
+						}
+						requestAnimationFrame(static);
+					})();
+
+					setTimeout(function(){
+						$cult.removeClass('spin');
+						$celebs.removeClass('spin2');
+						$static.removeClass('show');
+						won = false;
+						speed = oldSpeed;
+						$imgs.empty();
+						//$cult.remove('.img');
+					}, 20000);
+				}
+
+				next();
+
+				
 				(function f(){
 					requestAnimationFrame(f);
 
-					var r = cult.getBoundingClientRect();
+					//var r = $cult[0].getBoundingClientRect();
+					var win = won;
+					var flip = false;
 
-					if(r.left <= 0){
-						dx = speed;
-						nxt();
-					}
-					else if(r.right >= window.innerWidth){
-						dx = -speed;
-						nxt();
+					//if(!won){
+						if(imgx <= 0){
+							dx = 1;
+							flip = true;
+						}
+						else if(imgx + imgw >= window.innerWidth){
+							dx = -1;
+							flip = true;
+						}
+
+						if(imgy <= 0){
+							dy = 1;
+							flip = true;
+						}
+						else if(imgy + imgh >= window.innerHeight){
+							dy = -1;
+							flip = true;
+						}
+					//}
+
+					if(flip && !won){
+						var win = next();
+						if(win){
+							youwin();
+						}
 					}
 
-					if(r.top <= 0){
-						dy = speed;
-						nxt();
-					}
-					else if(r.bottom >= window.innerHeight){
-						dy = -speed;
-						nxt();
-					}
+					imgx = Math.min(Math.max(imgx + dx * speed, 0), window.innerWidth - imgw);
+					imgy = Math.min(Math.max(imgy + dy * speed, 0), window.innerHeight - imgh);
 
-					cult.style.left = '' + (r.left + dx) + 'px';
-					cult.style.top = '' + (r.top + dy) + 'px';
+					$cult.css({
+						left: '' + imgx + 'px',
+						top: '' + imgy + 'px',
+					});
+
+					//cult.style.left = '' + (r.left + dx) + 'px';
+					//cult.style.top = '' + (r.top + dy) + 'px';
 				})();
 
-			})(document.getElementById('cult_members'));
+			})($('#cult_members'), $('#cult_imgs'), $('#static'), $('#celebrities'));
 
 		</script>
 		<script>
