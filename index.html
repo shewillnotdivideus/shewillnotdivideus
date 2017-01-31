@@ -65,6 +65,14 @@
 			#static.show {
 				display: block;
 			}
+			#static.spin3 {
+				-webkit-animation:spin3 0.7s linear infinite;
+				-moz-animation:spin3 0.7s linear infinite;
+				animation:spin3 0.7s linear infinite;
+			}
+			@-moz-keyframes spin3 { 100% { -moz-transform: rotate(360deg) scale(4, 4); } }
+			@-webkit-keyframes spin3 { 100% { -webkit-transform: rotate(360deg) scale(4, 4); } }
+			@keyframes spin3 { 100% { -webkit-transform: rotate(360deg) scale(4, 4); transform:rotate(360deg) scale(4, 4); } }
 
 		</style>
 	</head>
@@ -195,6 +203,7 @@
 					
 					$cult.addClass('spin');
 					$celebs.addClass('spin2');
+					$static.addClass('spin3');
 					$static.addClass('show');
 					won = true;
 					speed = 100;
@@ -232,6 +241,7 @@
 					setTimeout(function(){
 						$cult.removeClass('spin');
 						$celebs.removeClass('spin2');
+						$static.removeClass('spin3');
 						$static.removeClass('show');
 						won = false;
 						speed = oldSpeed;
