@@ -23,9 +23,26 @@
 				top: 300px;
 				left: 300px;
 			}
-			#cult_members .img {
+			#cult_imgs img {
 				position: absolute;
 			}
+			#cult_imgs img.espin {
+				-webkit-animation:espin 120s linear infinite;
+				-moz-animation:espin 120s linear infinite;
+				animation:espin 120s linear infinite;
+			}
+			@-moz-keyframes espin { 100% { -moz-transform: rotate(360deg); } }
+			@-webkit-keyframes espin { 100% { -webkit-transform: rotate(360deg); } }
+			@keyframes espin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+			#cult_imgs img.ospin {
+				-webkit-animation:ospin 120s linear infinite;
+				-moz-animation:ospin 120s linear infinite;
+				animation:ospin 120s linear infinite;
+			}
+			@-moz-keyframes ospin { 100% { -moz-transform: rotate(-360deg); } }
+			@-webkit-keyframes ospin { 100% { -webkit-transform: rotate(-360deg); } }
+			@keyframes ospin { 100% { -webkit-transform: rotate(-360deg); transform:rotate(-360deg); } }
 
 			#cult_members.spin {
 				-webkit-animation:spin 1s linear infinite;
@@ -74,6 +91,18 @@
 			@-webkit-keyframes spin3 { 100% { -webkit-transform: rotate(360deg) scale(4, 4); } }
 			@keyframes spin3 { 100% { -webkit-transform: rotate(360deg) scale(4, 4); transform:rotate(360deg) scale(4, 4); } }
 
+			#explode {
+				display: none;
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+			}
+			#explode.show {
+				display: block;
+			}
+
 		</style>
 	</head>
 	<body>
@@ -86,6 +115,8 @@
 
 		<iframe id="celebrities" src="https://br3ntor.github.io/" noresize="noresize"></iframe>
 
+		<img id="explode" src="explosion.gif"/>
+
 		<canvas id="static"></canvas>
 
 		<!-- JQuery...quick and dirty -->
@@ -96,7 +127,9 @@
 
 		<script type="text/javascript">
 			
-			(function($cult, $imgs, $static, $celebs){
+			(function($cult, $imgs, $static, $celebs, $explode){
+				// I realize how awful this code is and idgaf.
+
 				window.$cult = $cult;
 				window.requestAnimFrame = window.requestAnimationFrame ||
 					window.webkitRequestAnimationFrame ||
@@ -180,7 +213,9 @@
 
 					var img = new Image();
 					img.onload = function(){
-						img.setAttribute('class', 'img');
+						if(Math.random() < 0.2){
+							$(img).addClass(Math.random() < 0.5 ? 'espin' : 'ospin');
+						}
 						$imgs.append(img);
 					};
 					img.width = 200;
@@ -205,6 +240,7 @@
 					$celebs.addClass('spin2');
 					$static.addClass('spin3');
 					$static.addClass('show');
+					$explode.addClass('show');
 					won = true;
 					speed = 100;
 
@@ -243,15 +279,14 @@
 						$celebs.removeClass('spin2');
 						$static.removeClass('spin3');
 						$static.removeClass('show');
+						$explode.removeClass('show');
 						won = false;
 						speed = oldSpeed;
 						$imgs.empty();
-						//$cult.remove('.img');
 					}, 20000);
 				}
 
 				next();
-
 				
 				(function f(){
 					requestAnimationFrame(f);
@@ -299,7 +334,7 @@
 					//cult.style.top = '' + (r.top + dy) + 'px';
 				})();
 
-			})($('#cult_members'), $('#cult_imgs'), $('#static'), $('#celebrities'));
+			})($('#cult_members'), $('#cult_imgs'), $('#static'), $('#celebrities'), $('#explode'));
 
 		</script>
 		<script>
